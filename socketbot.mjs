@@ -1,6 +1,6 @@
 import { Client, Intents } from "discord.js";
 import { getAllUserData } from "./users.js";
-import 'dotenv/config'
+import "dotenv/config";
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -13,10 +13,10 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 const server = createServer();
 const io = new Server(server, {
-    cors: {
-      origin: "*",
-    },
-})
+  cors: {
+    origin: "*",
+  },
+});
 
 server.listen(4000, () => {
   console.log("listening on *:4000");
@@ -38,8 +38,8 @@ client.once("ready", () => {
     if (message.author.bot) return;
     if (message.channel === channel) {
       let guildMember = await message.guild.members.fetch(message.author);
-      console.log(message.content)      
-io.emit(
+      console.log(message.content);
+      io.emit(
         "message",
         JSON.stringify({
           username: guildMember.displayName,
