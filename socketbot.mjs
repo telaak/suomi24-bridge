@@ -28,7 +28,7 @@ client.once("ready", () => {
     console.log("connection");
     socket.on("message", (messageObject) => {
       let messageJson = JSON.parse(messageObject);
-      if (messageJson.username !== "koristejakkara") {
+      if (messageJson.username !== process.env.USERNAME) {
         channel.send(`${messageJson.username} ${messageJson.message}`);
       }
     });
