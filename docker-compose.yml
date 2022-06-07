@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+
+  bot-backend:
+    image: telaaks/s24-bridge
+    restart: always
+    ports:
+      - 4000:4000
+    environment:
+      - TOKEN=
+      - CLIENT_ID=
+      - GUILD_ID=
+      - CHANNEL_ID=
