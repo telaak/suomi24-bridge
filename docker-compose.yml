@@ -2,6 +2,20 @@ version: '3.1'
 
 services:
 
+  standalone-firefox:
+    image: selenium/standalone-firefox:4.2.1-20220608
+    restart: always
+    ports:
+      - 4444:4444
+      - 7900:7900
+
+  side-runner:
+    image: telaaks/s24-selenium
+    restart: always
+    environment:
+      - USERNAME=
+      - PASSWORD=
+
   bot-backend:
     image: telaaks/s24-bridge
     restart: always
@@ -12,3 +26,4 @@ services:
       - CLIENT_ID=
       - GUILD_ID=
       - CHANNEL_ID=
+      - USERNAME=
