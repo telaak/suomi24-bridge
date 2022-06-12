@@ -90,13 +90,21 @@ client.once("ready", () => {
 
     if (commandName === "nimimerkki") {
       const newNick = interaction.options.getString("nimimerkki");
-      const guildMember = interaction.member;
-      nicksJson[guildMember] = newNick;
-      writeFileSync("./nicks.json", JSON.stringify(nicksJson));
-      await interaction.reply({
-        content: `Uusi nimimerkkisi on: ${newNick}`,
-        ephemeral: true,
-      });
+      const regex = /^[a-zA-Z0-9_]*$/
+      if (regex.test(newNick)) {
+        const guildMember = interaction.member;
+        nicksJson[guildMember] = newNick;
+        writeFileSync("./nicks.json", JSON.stringify(nicksJson));
+        await interaction.reply({
+          content: `Uusi nimimerkkisi on: ${newNick}`,
+          ephemeral: true,
+        });
+      } else {
+        await interaction.reply({
+          content: `Väärin muotoiltu nimimerkki: ${newNick}`,
+          ephemeral: true,
+        })
+      }
     }
   });
 });
