@@ -1,6 +1,7 @@
 import { Client, Intents } from "discord.js";
 import { getAllUserData } from "./users.js";
 import "dotenv/config";
+import { readFileSync, writeFileSync } from "fs";
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -22,6 +23,9 @@ server.listen(4000, () => {
   console.log("listening on *:4000");
 });
 
+const nicksJsonFile = readFileSync('./nicks.json', 'utf-8')
+const nicksJson = JSON.parse(nicksJsonFile)
+
 client.once("ready", () => {
   const channel = client.channels.cache.get(process.env.CHANNEL_ID);
   io.on("connection", (socket) => {
@@ -38,11 +42,12 @@ client.once("ready", () => {
     if (message.author.bot) return;
     if (message.channel === channel) {
       let guildMember = await message.guild.members.fetch(message.author);
-      console.log(message.content);
+      const userName = nicksJson[guildMember] ? nicksJson[guildMember] : guildMember.displayName
+      console.log(`${userName}: ${message.content}`)
       io.emit(
         "message",
         JSON.stringify({
-          username: guildMember.displayName,
+          username: userName,
           message: message.content,
         })
       );
@@ -64,6 +69,18 @@ client.once("ready", () => {
         ephemeral: true,
       });
     }
+
+    if (commandName === "nimimerkki") {
+      const newNick = interaction.options.getString("nimimerkki");
+      const guildMember = interaction.member
+      nicksJson[guildMember] = newNick
+      writeFileSync('./nicks.json', JSON.stringify(nicksJson))
+      await interaction.reply({
+        content: `Uusi nimimerkkisi on: ${newNick}`,
+        ephemeral: true
+      })
+    }
+
   });
 });
 

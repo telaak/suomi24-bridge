@@ -5,6 +5,13 @@ require('dotenv').config()
 
 const commands = [
 	new SlashCommandBuilder().setName('tukari').setDescription('Lista paikalla olevista'),
+	new SlashCommandBuilder()
+	.setName('nimimerkki')
+	.setDescription('Aseta nimimerkki S24 varten')
+	.addStringOption(option =>
+		option.setName('nimimerkki')
+			.setDescription('Uusi nimimerkkisi')
+			.setRequired(true))
 ]
 	.map(command => command.toJSON());
 
