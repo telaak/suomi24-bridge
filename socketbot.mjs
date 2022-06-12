@@ -23,17 +23,33 @@ server.listen(4000, () => {
   console.log("listening on *:4000");
 });
 
-const nicksJsonFile = readFileSync('./nicks.json', 'utf-8')
-const nicksJson = JSON.parse(nicksJsonFile)
+const nicksJsonFile = readFileSync("./nicks.json", "utf-8");
+const nicksJson = JSON.parse(nicksJsonFile);
 
 client.once("ready", () => {
   const channel = client.channels.cache.get(process.env.CHANNEL_ID);
   io.on("connection", (socket) => {
     console.log("connection");
-    socket.on("message", (messageObject) => {
+    socket.on("message", async (messageObject) => {
       let messageJson = JSON.parse(messageObject);
       if (messageJson.username !== process.env.USERNAME) {
-        channel.send(`${messageJson.username} ${messageJson.message}`);
+        let parsedMessage = messageJson.message
+        const regex = /http:\/\/chat\.suomi24\.fi\/img\/vip\/[a-z]{1,}\.gif/g;
+        const found = parsedMessage.match(regex);
+        if (found) {
+          for (const f of found) {
+            const gifRegex = /[a-z]{1,}\.gif/g;
+            const gif = f.match(gifRegex)[0];
+            const guild = await client.guilds.fetch(process.env.GUILD_ID)
+            const emojiReplacement = guild.emojis.cache?.find(
+              (emoji) => emoji.name == gif.replace(".gif", "")
+            )
+            parsedMessage = parsedMessage.replace(f, emojiReplacement)
+  
+          }
+          console.log(parsedMessage)
+        }
+        channel.send(`${messageJson.username} ${parsedMessage}`);
       }
     });
   });
@@ -42,8 +58,10 @@ client.once("ready", () => {
     if (message.author.bot) return;
     if (message.channel === channel) {
       let guildMember = await message.guild.members.fetch(message.author);
-      const userName = nicksJson[guildMember] ? nicksJson[guildMember] : guildMember.displayName
-      console.log(`${userName}: ${message.content}`)
+      const userName = nicksJson[guildMember]
+        ? nicksJson[guildMember]
+        : guildMember.displayName;
+      console.log(`${userName}: ${message.content}`);
       io.emit(
         "message",
         JSON.stringify({
@@ -72,15 +90,14 @@ client.once("ready", () => {
 
     if (commandName === "nimimerkki") {
       const newNick = interaction.options.getString("nimimerkki");
-      const guildMember = interaction.member
-      nicksJson[guildMember] = newNick
-      writeFileSync('./nicks.json', JSON.stringify(nicksJson))
+      const guildMember = interaction.member;
+      nicksJson[guildMember] = newNick;
+      writeFileSync("./nicks.json", JSON.stringify(nicksJson));
       await interaction.reply({
         content: `Uusi nimimerkkisi on: ${newNick}`,
-        ephemeral: true
-      })
+        ephemeral: true,
+      });
     }
-
   });
 });
 

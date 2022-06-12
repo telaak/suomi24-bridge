@@ -1,3 +1,10 @@
+let socketScript = document.createElement("script");
+socketScript.setAttribute(
+  "src",
+  "http://bot-backend:4000/socket.io/socket.io.js"
+);
+document.head.appendChild(socketScript);
+
 const mainframeLoadPromise = new Promise((resolve, reject) => {
   mainframe.addEventListener("load", (event) => {
     resolve();
@@ -20,11 +27,11 @@ Promise.race([mainframeLoadPromise, timerPromise]).then(() => {
   const inputButton = mainframe.document
     .querySelectorAll("frameset")[3]
     .firstElementChild.contentWindow.document.querySelector(".say");
-  const socketConnection = io.connect("http://localhost:4000");
+  const socketConnection = io.connect("http://bot-backend:4000");
 
   socketConnection.on("message", (messageObject) => {
     const messageJson = JSON.parse(messageObject);
-    inputElement.value = `${messageJson.username}: ${messageJson.message}`;
+    inputElement.value = messageJson.username + ": " + messageJson.message;
     inputButton.click();
   });
 
@@ -45,7 +52,7 @@ Promise.race([mainframeLoadPromise, timerPromise]).then(() => {
       messageBoolean = true;
     } else if (messageBoolean) {
       if (addedNodes[0].nodeName === "BR") {
-        console.log(`${username} ${message}`);
+        console.log(username + message);
         if (!username.startsWith("viestisilta")) {
           socketConnection.emit(
             "message",
@@ -64,6 +71,8 @@ Promise.race([mainframeLoadPromise, timerPromise]).then(() => {
         } else {
           message += addedNodes[0].textContent;
         }
+      } else if (addedNodes[0].nodeName === "IMG") {
+        message += addedNodes[0].src;
       }
     }
   };
